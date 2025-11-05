@@ -15,7 +15,7 @@ def _nb2htmlfname(nb_path, dest=None):
 
 # TODO: Open a GitHub Issue in addition to printing warnings
 for original, new in warnings:
-    print(f'{original} has been renamed to {new} to be complaint with Jekyll naming conventions.\n')
+    print(f'{original} has been renamed to {new} to be compliant with Jekyll naming conventions.\n')
     
 ## apply monkey patches
 export2html._nb2htmlfname = _nb2htmlfname
