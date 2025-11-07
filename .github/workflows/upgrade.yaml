@@ -86,12 +86,16 @@ jobs:
           new_num = new_version.read_text().strip()
           print(f'Old version: {old_num}')
           print(f'New version: {new_num}')
-          if old_num == new_num:
-            print('::set-output name=vbump::false')
-          else:
-            print('::set-output name=vbump::true')
+          import os
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            if old_num == new_num:
+              print('vbump=false', file=fh)
+            else:
+              print('vbump=true', file=fh)
         else:
-          print('::set-output name=vbump::true')
+          import os
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print('vbump=true', file=fh)
       shell: python
 
     - name: copy new files
@@ -151,7 +155,7 @@ jobs:
         # read data from config files
         settings.read(settings_path)
         with open(config_path, 'r') as cfg:
-          config = yaml.load(cfg)
+          config = yaml.safe_load(cfg)
         
         # sync value for baseurl b/w config.yml and settings.ini
         settings['DEFAULT']['baseurl'] = config['baseurl']
@@ -205,7 +209,10 @@ jobs:
                         base: 'master',
                         body: `${contents}`
                         })
-                      .then(result => console.log(`::set-output name=pr_num::${result.data.number}`))
+                      .then(result => {
+                        const fs = require('fs');
+                        fs.appendFileSync(process.env.GITHUB_OUTPUT, `pr_num=${result.data.number}\n`);
+                      })
   
     - name: Comment on issue if failure
       if: failure()  && (steps.check_version.outputs.vbump == 'true')
